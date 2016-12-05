@@ -24,20 +24,24 @@ module EksBlowfishSetup(
     input [7:0] cost,
     input [575:0] Key,
 	 input rst,
-    output outp
+    output[327:0] cryptm
     );
 	 
 	 integer j;
 	 integer i;
 	 integer q;
 	 integer y;
+	 integer ecb;
 	 reg initDone;
+	 reg expandDone;
+	 reg [191:0] cyph;
 	 reg [63:0] ctext;
 	 reg [31:0] P [0:17];
 	 reg [31:0] S0 [0:255];
 	 reg [31:0] S1 [0:255];
 	 reg [31:0] S2 [0:255];
 	 reg [31:0] S3 [0:255];
+	 reg [327:0] cryptmw;
 	 
 	function [31:0] f;
 	input [31:0] inp;
@@ -191,6 +195,8 @@ module EksBlowfishSetup(
 		if(rst)
 		begin
 			
+			initDone = 0;
+			expandDone = 0;
 			P[0] <= 32'h243f6a88;
 			P[1] <= 32'h85a308d3;
 			P[2] <= 32'h13198a2e;
@@ -209,6 +215,8 @@ module EksBlowfishSetup(
 			P[15] <= 32'hb5470917;
 			P[16] <= 32'h9216d5d9;
 			P[17] <= 32'h8979fb1b;
+			
+			cyph <= 192'h4f72706865616e4265686f6c64657253637279446f756274;
 			
 			
 			S0[0] <= 32'hd1310ba6; S0[1] <= 32'h98dfb5ac; S0[2] <= 32'h2ffd72db;
@@ -577,9 +585,21 @@ module EksBlowfishSetup(
 					expandKey(128'd0, {Salt, Salt, Salt, Salt, Salt[127:64]});
 				end
 			end
+			expandDone = 0;
 			
 		end
 		
+		else if(expandDone)
+		begin
+			for (ecb = 0; ecb < 64; ecb = ecb + 1)
+			begin
+				cyph[191:128] = Encrypt(cyph[191:128]);
+				cyph[127:64] = Encrypt(cyph[127:64]);
+				cyph[63:0] = Encrypt(cyph[63:0]);
+			end
+			cryptmw <= {cost, Salt, cyph};
+		end
+		
 	end
-	
+	assign cryptm = cryptmw;
 endmodule
