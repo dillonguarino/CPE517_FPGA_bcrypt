@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: Alex Buhse
@@ -585,7 +585,8 @@ module EksBlowfishSetup(
 					expandKey(128'd0, {Salt, Salt, Salt, Salt, Salt[127:64]});
 				end
 			end
-			expandDone = 0;
+			expandDone <= 1'b1;
+			initDone <= 1'b0;
 			
 		end
 		
