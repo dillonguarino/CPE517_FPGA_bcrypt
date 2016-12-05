@@ -583,3 +583,104 @@ module EksBlowfishSetup(
 	end
 	
 endmodule
+
+
+module expandKey( 
+    input state,
+    input salt,
+    input key,
+    input P,
+    output outp
+    );
+
+	//reg [31:0] P [0:17];
+	P[0] = key[0:31] xor P[0];
+	P[1] = key[32:63] xor P[1];
+	P[2] = key[64:95] xor P[2];
+	P[3] = key[96:127] xor P[3];
+	P[4] = key[128:159] xor P[4];
+	P[5] = key[160:191] xor P[5];
+	P[6] = key[192:223] xor P[6];
+	P[7] = key[224:255] xor P[7];
+	P[8] = key[256:287] xor P[8];
+	P[9] = key[288:319] xor P[9];
+	P[10] = key[320:351] xor P[10];
+	P[11] = key[352:383] xor P[11];
+	P[12] = key[384:415] xor P[12];
+	P[13] = key[416:447] xor P[13];
+	P[14] = key[448:479] xor P[14];
+	P[15] = key[480:511] xor P[15];
+	P[16] = key[512:543] xor P[16];
+	P[17] = key[544:575] xor P[17];
+
+	ctext = Encrypt(salt[0:63])
+
+	P[0] = ctext[0:31];
+	P[1] = ctext[32:63];
+
+	//n = 2
+	ctext = Encrypt(ctext xor salt[64:127]);
+	p[2] = ctext[0:31];
+	p[3] = ctext[32:63];
+	
+	//n = 3
+	ctext = Encrypt(ctext xor salt[128:191]);
+	p[4] = ctext[0:31];
+	p[5] = ctext[32:63];
+
+	//n = 4
+	ctext = Encrypt(ctext xor salt[192:255]);
+	p[6] = ctext[0:31];
+	p[7] = ctext[32:63];
+
+	//n = 5
+	ctext = Encrypt(ctext xor salt[256:319]);
+	p[8] = ctext[0:31];
+	p[9] = ctext[32:63];
+
+	//n = 6
+	ctext = Encrypt(ctext xor salt[320:383]);
+	p[10] = ctext[0:31];
+	p[11] = ctext[32:63];
+
+	//n = 7
+	ctext = Encrypt(ctext xor salt[384:447]);
+	p[12] = ctext[0:31];
+	p[13] = ctext[32:63];
+
+	//n = 8
+	ctext = Encrypt(ctext xor salt[448:511]);
+	p[14] = ctext[0:31];
+	p[15] = ctext[32:63];
+
+	//n = 9
+	ctext = Encrypt(ctext xor salt[512:575]);
+	p[16] = ctext[0:31];
+	p[17] = ctext[32:63];
+	
+
+	outp = state;
+
+	begin
+	i = 1;
+	while ( i < 5)
+		begin
+		j = 0;
+		while (j < 128)
+			begin
+			n = j % 18;
+			lower = 64 * (n-1);
+			upper = 64 * n - 1;
+			ctext = Encrypt( ctext xor salt[lower:upper] );
+			case(i)
+				1: S0[2*j] = ctext[0:31]; S0[2*j+1] = ctext[32:63];
+				2: S1[2*j] = ctext[0:31]; S0[2*j+1] = ctext[32:63];
+				3: S2[2*j] = ctext[0:31]; S0[2*j+1] = ctext[32:63];
+				4: S3[2*j] = ctext[0:31]; S0[2*j+1] = ctext[32:63];
+							
+			end
+		i = i + 1;
+		end
+	end
+endmodule
+
